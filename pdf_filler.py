@@ -116,13 +116,26 @@ def parse_ojt_timing(timing_str: str) -> tuple:
 
 def format_start_date(date_str: str) -> str:
     """
-    Format date string (e.g. '2026-09-01') into ordinal format: '1st September 2026'.
+    Format date string (whether '2026-09-01' or '01/09/2026') into ordinal format: '1st September 2026'.
     """
     if not date_str:
         return ""
     try:
-        from dateutil.parser import parse as parse_date
-        dt = parse_date(str(date_str).strip())
+        s = str(date_str).strip()
+        from datetime import datetime
+        # Check YYYY-MM-DD
+        m_iso = re.match(r"^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$", s)
+        if m_iso:
+            dt = datetime(int(m_iso.group(1)), int(m_iso.group(2)), int(m_iso.group(3)))
+        else:
+            # Check DD/MM/YYYY or DD-MM-YYYY (day first)
+            m_dmy = re.match(r"^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$", s)
+            if m_dmy:
+                dt = datetime(int(m_dmy.group(3)), int(m_dmy.group(2)), int(m_dmy.group(1)))
+            else:
+                from dateutil.parser import parse as parse_date
+                dt = parse_date(s)
+
         day = dt.day
         if 11 <= (day % 100) <= 13:
             suffix = "th"
