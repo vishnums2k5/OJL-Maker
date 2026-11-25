@@ -66,7 +66,7 @@ def parse_structured_entry(work_text: str) -> dict:
         content = content.strip()
         # Remove leading/trailing ** markdown
         content = re.sub(r'^\*{2,}\s*', '', content)
-        content = re.sub(r'\s*\*{2,}$', '', content)
+        content = content.rstrip(' *\t\r\n')
         # Remove stray Day headers
         content = re.sub(r'^#{1,}\s*Day\s*\d+\s*$', '', content, flags=re.MULTILINE | re.IGNORECASE)
         # Remove document titles (e.g. "# 📘 OJL Logbook (Corrected...)")

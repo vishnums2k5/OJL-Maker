@@ -62,8 +62,8 @@ def clean_text_field(text: str) -> str:
     # (keeps standard ascii + smart quotes and em/en dashes)
     text = re.sub(r'[^\x00-\x7F\u2018\u2019\u201C\u201D\u2013\u2014]', '.', text)
 
-    # Remove trailing dashes (like "--" at the end of the text)
-    text = re.sub(r'(?:\s*-+)+$', '', text)
+    # Remove trailing dashes and whitespace safely without catastrophic regex backtracking
+    text = text.rstrip(' \t\r\n-–—')
 
     # Check if it looks like a JSON array
     if text.startswith('[') and text.endswith(']'):
