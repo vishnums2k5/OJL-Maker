@@ -114,6 +114,25 @@ def parse_ojt_timing(timing_str: str) -> tuple:
     return timing_str.strip(), ""
 
 
+def format_start_date(date_str: str) -> str:
+    """
+    Format date string (e.g. '2026-09-01') into ordinal format: '1st September 2026'.
+    """
+    if not date_str:
+        return ""
+    try:
+        from dateutil.parser import parse as parse_date
+        dt = parse_date(str(date_str).strip())
+        day = dt.day
+        if 11 <= (day % 100) <= 13:
+            suffix = "th"
+        else:
+            suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+        return f"{day}{suffix} {dt.strftime('%B %Y')}"
+    except Exception:
+        return str(date_str)
+
+
 def detect_pdf_fields(pdf_bytes: bytes) -> dict:
     """Detect AcroForm fields in the PDF and return {field_name: page_index} mapping."""
     fields = {}
@@ -181,7 +200,10 @@ def _build_overlay_page(c_canvas, page_data: dict, page_width: float, page_heigh
     new_fields = ["name", "registration_number", "start_date", "program_name", "semester", "location", "industry_partner_name", "phone_no", "email_id"]
     for f in new_fields:
         if page_data.get(f):
-            fields_to_draw[f] = page_data[f]
+            val = str(page_data[f])
+            if f == "start_date":
+                val = format_start_date(val)
+            fields_to_draw[f] = val
 
     for field_key, text_value in fields_to_draw.items():
         if not text_value:
